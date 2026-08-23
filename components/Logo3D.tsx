@@ -11,7 +11,7 @@ function Logo3DMesh() {
   // Define the exact shapes of the FreeWheel emblem
   const { topBarGeom, leftWingGeom, rightWingGeom } = useMemo(() => {
     const extrudeSettings: THREE.ExtrudeGeometryOptions = {
-      depth: 0.42,
+      depth: 0.45,
       bevelEnabled: true,
       bevelSegments: 5,
       steps: 1,
@@ -59,20 +59,20 @@ function Logo3DMesh() {
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
-    const mouseX = state.pointer.x * 0.4;
-    const mouseY = state.pointer.y * 0.4;
+    const mouseX = state.pointer.x * 0.45;
+    const mouseY = state.pointer.y * 0.45;
 
     if (groupRef.current) {
-      // Gentle breathing rotation + responsive mouse tilt
-      groupRef.current.rotation.y = Math.sin(t * 0.5) * 0.15 + mouseX;
+      // Smooth breathing rotation + responsive cursor tilt
+      groupRef.current.rotation.y = Math.sin(t * 0.4) * 0.18 + mouseX;
       groupRef.current.rotation.x = Math.sin(t * 0.3) * 0.08 - mouseY * 0.8;
       groupRef.current.rotation.z = Math.cos(t * 0.25) * 0.04;
     }
   });
 
   return (
-    <Float speed={2.2} rotationIntensity={0.3} floatIntensity={0.8}>
-      <group ref={groupRef} position={[0, 0.15, 0]} scale={1.15}>
+    <Float speed={2.5} rotationIntensity={0.35} floatIntensity={1.0}>
+      <group ref={groupRef} position={[0, 0, 0]} scale={1.25}>
         {/* Top Bar - Cyan Neon Metal */}
         <mesh geometry={topBarGeom} castShadow receiveShadow>
           <meshStandardMaterial
@@ -107,64 +107,24 @@ function Logo3DMesh() {
         </mesh>
 
         {/* Internal Core Light Flares */}
-        <pointLight position={[0, 0.2, 0.8]} intensity={2.5} color="#00E5FF" distance={5} />
-        <pointLight position={[-0.8, -0.4, 0.6]} intensity={1.8} color="#087CFF" distance={4} />
+        <pointLight position={[0, 0.2, 0.8]} intensity={2.8} color="#00E5FF" distance={5} />
+        <pointLight position={[-0.8, -0.4, 0.6]} intensity={2.0} color="#087CFF" distance={4} />
       </group>
     </Float>
-  );
-}
-
-function HologramPlatform() {
-  const ringsRef = useRef<THREE.Group>(null);
-
-  useFrame((state) => {
-    if (ringsRef.current) {
-      ringsRef.current.rotation.y = state.clock.getElapsedTime() * 0.12;
-    }
-  });
-
-  return (
-    <group position={[0, -2.4, 0]}>
-      {/* Dark metallic base cylinder */}
-      <mesh>
-        <cylinderGeometry args={[2.8, 3.2, 0.25, 64]} />
-        <meshStandardMaterial color="#040914" metalness={0.95} roughness={0.18} />
-      </mesh>
-
-      {/* Rotating holographic energy rings */}
-      <group ref={ringsRef} position={[0, 0.13, 0]}>
-        <mesh rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[2.5, 2.62, 64]} />
-          <meshBasicMaterial color="#00D2FF" side={THREE.DoubleSide} transparent opacity={0.7} />
-        </mesh>
-        <mesh rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[1.8, 1.88, 64]} />
-          <meshBasicMaterial color="#087CFF" side={THREE.DoubleSide} transparent opacity={0.85} />
-        </mesh>
-        <mesh rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.9, 0.95, 48]} />
-          <meshBasicMaterial color="#38BDF8" side={THREE.DoubleSide} transparent opacity={0.6} />
-        </mesh>
-      </group>
-
-      {/* Upward beam light */}
-      <pointLight position={[0, 0.8, 0]} intensity={2.2} color="#00D2FF" distance={5} />
-    </group>
   );
 }
 
 export const Logo3D = () => {
   return (
     <div className="w-full h-full min-h-[380px] lg:min-h-[550px] relative">
-      <Canvas camera={{ position: [0, 0.3, 6.8], fov: 45 }}>
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[6, 8, 5]} intensity={1.8} color="#ffffff" />
-        <directionalLight position={[-6, -4, -3]} intensity={1.0} color="#087CFF" />
-        <directionalLight position={[0, 5, -5]} intensity={0.6} color="#00D2FF" />
+      <Canvas camera={{ position: [0, 0, 6.5], fov: 45 }}>
+        <ambientLight intensity={0.6} />
+        <directionalLight position={[6, 8, 5]} intensity={2.0} color="#ffffff" />
+        <directionalLight position={[-6, -4, -3]} intensity={1.2} color="#087CFF" />
+        <directionalLight position={[0, 5, -5]} intensity={0.8} color="#00D2FF" />
 
         <Logo3DMesh />
-        <HologramPlatform />
-        <Sparkles count={55} scale={6.5} size={2.5} speed={0.4} opacity={0.7} color="#00D2FF" />
+        <Sparkles count={60} scale={7.0} size={2.5} speed={0.4} opacity={0.7} color="#00D2FF" />
       </Canvas>
 
       {/* Ambient background blend glow */}
