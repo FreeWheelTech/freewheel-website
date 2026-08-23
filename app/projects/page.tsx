@@ -126,9 +126,20 @@ export default function Projects() {
                       <h3 className="text-xl font-heading font-bold mb-2 group-hover:text-primary transition-colors">
                         {project.title}
                       </h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
+                      <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                         {project.description}
                       </p>
+
+                      {/* Tech stack pills */}
+                      {project.technologies && (
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                          {project.technologies.map((t, idx) => (
+                            <span key={idx} className="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-secondary/80 text-muted-foreground border border-border/60">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
 

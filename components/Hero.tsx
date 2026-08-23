@@ -3,22 +3,15 @@
 import { motion } from "framer-motion";
 import { MagneticButton } from "./MagneticButton";
 import { Logo3D } from "./Logo3D";
-import { companyInfo } from "@/data/company";
 import Link from "next/link";
-import { ArrowRight, Sparkles, CheckCircle2, Zap, ShieldCheck } from "lucide-react";
+import { ArrowRight, Code2 } from "lucide-react";
 
 export const Hero = () => {
-  const stats = [
-    { value: "50+", label: "Projects Delivered", icon: Zap },
-    { value: "99.9%", label: "System Uptime", icon: ShieldCheck },
-    { value: "100%", label: "Client Satisfaction", icon: CheckCircle2 },
-  ];
-
   return (
     <section className="relative min-h-[92vh] flex items-center pt-28 pb-16 overflow-hidden">
       {/* Dynamic Background Glows */}
-      <div className="absolute top-1/4 left-1/6 w-[450px] h-[450px] bg-primary/20 rounded-full blur-[140px] -z-10 animate-pulse-subtle" />
-      <div className="absolute bottom-1/4 right-1/6 w-[550px] h-[550px] bg-primary-bright/15 rounded-full blur-[160px] -z-10 animate-pulse-subtle" />
+      <div className="absolute top-1/4 left-1/6 w-[450px] h-[450px] bg-primary/15 rounded-full blur-[140px] -z-10 animate-pulse-subtle" />
+      <div className="absolute bottom-1/4 right-1/6 w-[550px] h-[550px] bg-primary-bright/10 rounded-full blur-[160px] -z-10 animate-pulse-subtle" />
 
       {/* Subtle Mesh Grid */}
       <div
@@ -39,52 +32,37 @@ export const Hero = () => {
           className="lg:col-span-7 z-10"
         >
           {/* Announcement Pill */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mb-6 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide bg-primary/10 text-primary border border-primary/20 mb-6 shadow-sm">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
             </span>
-            <span>Next-Generation Digital Engineering</span>
+            <span>Custom Web, Mobile & Automation Engineering</span>
           </div>
 
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold font-heading leading-[1.08] tracking-tight mb-6">
-            We build. <br />
-            <span className="text-gradient">You grow.</span>
+            We build software. <br />
+            <span className="text-gradient">You scale business.</span>
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl leading-relaxed">
-            {companyInfo.description}
+            FreeWheel Technology Solutions partners with founders and businesses to engineer custom web applications, cross-platform mobile apps, and workflow automations from idea to deployment.
           </p>
 
           {/* Primary CTAs */}
-          <div className="flex flex-wrap items-center gap-4 mb-12">
+          <div className="flex flex-wrap items-center gap-4">
             <Link href="/contact">
               <MagneticButton className="text-base px-8 py-4 rounded-xl shadow-lg shadow-primary/25">
                 <span>Start a Project</span>
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </MagneticButton>
             </Link>
-            <Link href="/services">
+            <Link href="/projects">
               <MagneticButton variant="outline" className="text-base px-8 py-4 rounded-xl">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <span>Explore Services</span>
+                <Code2 className="w-4 h-4 text-primary" />
+                <span>View Recent Work</span>
               </MagneticButton>
             </Link>
-          </div>
-
-          {/* Live Trust Metrics Strip */}
-          <div className="grid grid-cols-3 gap-4 pt-6 border-t border-border/80 max-w-xl">
-            {stats.map((stat, i) => (
-              <div key={i} className="flex flex-col">
-                <div className="flex items-center gap-1.5 text-xl sm:text-2xl font-bold font-heading text-foreground">
-                  <stat.icon className="w-4 h-4 text-primary" />
-                  <span>{stat.value}</span>
-                </div>
-                <span className="text-xs text-muted-foreground font-medium mt-0.5">
-                  {stat.label}
-                </span>
-              </div>
-            ))}
           </div>
         </motion.div>
 

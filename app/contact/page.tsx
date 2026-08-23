@@ -18,7 +18,7 @@ import {
 export default function Contact() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
-  const [selectedBudget, setSelectedBudget] = useState("$1k - $5k");
+  const [selectedBudget, setSelectedBudget] = useState("₹10k - ₹50k");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -26,7 +26,10 @@ export default function Contact() {
     details: "",
   });
 
-  const budgetOptions = ["< $1k", "$1k - $5k", "$5k - $15k", "$15k+"];
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const budgetOptions = ["< ₹10k", "₹10k - ₹50k", "₹50k - ₹1.5L", "₹1.5L+"];
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(companyInfo.contact.email);
@@ -34,13 +37,44 @@ export default function Contact() {
     setTimeout(() => setCopiedEmail(false), 2500);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setIsSubmitted(false);
+    setIsLoading(true);
+    setErrorMessage("");
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          service: formData.service,
+          budget: selectedBudget,
+          details: formData.details,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to submit project request.");
+      }
+
+      setIsSubmitted(true);
       setFormData({ name: "", email: "", service: "", details: "" });
-    }, 6000);
+      setTimeout(() => {
+        setIsSubmitted(false);
+      }, 7000);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage("Something went wrong. Please try again or email directly.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -266,9 +300,28 @@ export default function Contact() {
                     />
                   </div>
 
-                  <MagneticButton type="submit" className="w-full py-4 text-base rounded-xl font-bold shadow-lg shadow-primary/25">
-                    <Send className="w-4 h-4" />
-                    <span>Send Project Request</span>
+                  {errorMessage && (
+                    <div className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-xs font-medium">
+                      {errorMessage}
+                    </div>
+                  )}
+
+                  <MagneticButton
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full py-4 text-base rounded-xl font-bold shadow-lg shadow-primary/25 disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? (
+                      <span className="flex items-center gap-2">
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Sending Request...</span>
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <Send className="w-4 h-4" />
+                        <span>Send Project Request</span>
+                      </span>
+                    )}
                   </MagneticButton>
                 </form>
               )}
