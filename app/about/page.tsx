@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Team } from "@/components/Team";
 import { CTA } from "@/components/CTA";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Lightbulb,
   DollarSign,
@@ -17,6 +18,8 @@ import {
 } from "lucide-react";
 
 export default function About() {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
   const differentiators = [
     {
       title: "Idea-to-Impact",
@@ -147,7 +150,9 @@ export default function About() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.08, duration: 0.5 }}
-                  className="glass-card p-6 sm:p-7 rounded-2xl group transition-all duration-300 hover:-translate-y-2 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/20 cursor-pointer flex flex-col justify-between"
+                  onMouseEnter={() => setHoveredIndex(i)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                  className="glass-card p-6 sm:p-7 rounded-2xl group transition-all duration-300 hover:-translate-y-2 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/20 cursor-pointer flex flex-col justify-start min-h-[140px]"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-4">
@@ -163,9 +168,19 @@ export default function About() {
                       {reason.title}
                     </h3>
 
-                    <p className="text-sm leading-relaxed text-muted-foreground opacity-0 max-h-0 overflow-hidden transition-all duration-300 ease-out group-hover:opacity-100 group-hover:max-h-40 group-hover:mt-3">
-                      {reason.description}
-                    </p>
+                    <AnimatePresence>
+                      {hoveredIndex === i && (
+                        <motion.p
+                          initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                          animate={{ opacity: 1, height: "auto", marginTop: 12 }}
+                          exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                          transition={{ duration: 0.28, ease: "easeOut" }}
+                          className="text-sm leading-relaxed text-muted-foreground overflow-hidden"
+                        >
+                          {reason.description}
+                        </motion.p>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </motion.div>
               ))}
