@@ -147,10 +147,10 @@ export default function About() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.08, duration: 0.5 }}
-                  className="glass-card p-7 rounded-2xl group transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 flex flex-col justify-between"
+                  className="glass-card p-6 sm:p-7 rounded-2xl group transition-all duration-300 hover:-translate-y-2 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/20 cursor-pointer flex flex-col justify-between"
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-5">
+                    <div className="flex items-center justify-between mb-4">
                       <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary/20 transition-all">
                         <reason.icon className="w-5 h-5" />
                       </div>
@@ -159,11 +159,11 @@ export default function About() {
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-bold font-heading mb-2.5 group-hover:text-primary transition-colors">
+                    <h3 className="text-lg font-bold font-heading group-hover:text-primary transition-colors">
                       {reason.title}
                     </h3>
 
-                    <p className="text-sm leading-relaxed text-muted-foreground">
+                    <p className="text-sm leading-relaxed text-muted-foreground opacity-0 max-h-0 overflow-hidden transition-all duration-300 ease-out group-hover:opacity-100 group-hover:max-h-40 group-hover:mt-3">
                       {reason.description}
                     </p>
                   </div>
