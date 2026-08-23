@@ -15,7 +15,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const recipientEmail = process.env.CONTACT_RECEIVER_EMAIL || "freewheelts@gmail.com";
+    const recipientEmail = process.env.CONTACT_RECEIVER_EMAIL || "fwtsbusiness@gmail.com";
     const resendApiKey = process.env.RESEND_API_KEY;
     const smtpUser = process.env.SMTP_USER;
     const smtpPass = process.env.SMTP_PASS;
