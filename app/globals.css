@@ -1,0 +1,179 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-space-grotesk);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-bright: var(--primary-bright);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  :root {
+    --background: #FAFCFF;
+    --foreground: #090E1A;
+    --card: #FFFFFF;
+    --card-foreground: #090E1A;
+    --primary: #087CFF;
+    --primary-bright: #00C3FF;
+    --primary-foreground: #FFFFFF;
+    --secondary: #F0F5FF;
+    --secondary-foreground: #0F1D38;
+    --muted: #F1F5FB;
+    --muted-foreground: #5A6A85;
+    --accent: #EBF3FE;
+    --accent-foreground: #087CFF;
+    --destructive: #EF4444;
+    --destructive-foreground: #FFFFFF;
+    --border: #E2E8F4;
+    --input: #E2E8F4;
+    --ring: #087CFF;
+  }
+
+  .dark {
+    --background: #030712;
+    --foreground: #F8FAFC;
+    --card: #081226;
+    --card-foreground: #F8FAFC;
+    --primary: #087CFF;
+    --primary-bright: #00D0FF;
+    --primary-foreground: #FFFFFF;
+    --secondary: #0F1F3D;
+    --secondary-foreground: #F8FAFC;
+    --muted: #0A162B;
+    --muted-foreground: #8FA4C4;
+    --accent: #112852;
+    --accent-foreground: #38BDF8;
+    --destructive: #EF4444;
+    --destructive-foreground: #F8FAFC;
+    --border: #14284D;
+    --input: #122242;
+    --ring: #00D0FF;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased overflow-x-hidden selection:bg-primary/20 selection:text-primary;
+  }
+}
+
+/* Custom modern scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(8, 124, 255, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(8, 124, 255, 0.5);
+}
+
+/* Glassmorphism system */
+.glass-card {
+  @apply bg-card/75 backdrop-blur-xl border border-border/80 shadow-lg shadow-black/5 dark:shadow-black/20;
+}
+
+.glass-card-hover {
+  @apply transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1.5;
+}
+
+.glass-nav {
+  @apply bg-background/80 backdrop-blur-xl border-b border-border/60;
+}
+
+/* Glowing and gradient utilities */
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary-bright to-sky-300;
+}
+
+.text-gradient-cyan {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500;
+}
+
+.glow-pill {
+  @apply relative inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/30 shadow-[0_0_15px_rgba(8,124,255,0.15)];
+}
+
+.glow-border {
+  position: relative;
+}
+.glow-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(8, 124, 255, 0.5), transparent 60%, rgba(0, 208, 255, 0.4));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Ambient glow blobs */
+.glow-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(130px);
+  pointer-events: none;
+  z-index: -10;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s ease-in-out infinite;
+}
