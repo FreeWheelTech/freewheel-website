@@ -1,0 +1,317 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  OWNER
+  ADMIN
+}
+
+enum DietaryType {
+  VEG
+  EGG
+  NON_VEG
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  COMPLETED
+  CANCELLED
+  REJECTED
+}
+
+enum PaymentStatus {
+  CREATED
+  PENDING
+  AUTHORIZED
+  SUCCESS
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  phone        String?  @unique
+  passwordHash String
+  role         Role     @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  customerProfile CustomerProfile?
+  staffAssignments RestaurantStaff[]
+  statusChanges   OrderStatusHistory[]
+  notifications   Notification[]
+  refreshTokens   RefreshToken[]
+}
+
+model CustomerProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  addresses Address[]
+  cart      Cart?
+  orders    Order[]
+  reviews   Review[]
+}
+
+model Address {
+  id                String          @id @default(uuid())
+  customerProfileId String
+  label             String          // e.g., "Home", "Office"
+  addressLine1      String
+  addressLine2      String?
+  city              String
+  postalCode        String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  customerProfile CustomerProfile @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+}
+
+model Restaurant {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  address     String
+  phone       String?
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  staff      RestaurantStaff[]
+  categories Category[]
+  orders     Order[]
+  reviews    Review[]
+  carts      Cart[]
+  
+  averageRating Decimal @default(0)
+  reviewCount   Int     @default(0)
+
+  @@index([name])
+}
+
+model RestaurantStaff {
+  id           String @id @default(uuid())
+  userId       String
+  restaurantId String
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, restaurantId])
+}
+
+model Category {
+  id           String @id @default(uuid())
+  restaurantId String
+  name         String
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  menuItems  MenuItem[]
+
+  @@unique([restaurantId, name])
+  @@index([restaurantId])
+}
+
+model MenuItem {
+  id           String       @id @default(uuid())
+  categoryId   String
+  name         String
+  description  String?
+  price        Decimal
+  availability Boolean      @default(true)
+  imageUrl     String?
+  dietaryType  DietaryType?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  category Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  addons   MenuItemAddon[]
+  cartItems CartItem[]
+  orderItems OrderItem[]
+
+  @@index([categoryId])
+  @@index([availability])
+  @@index([name])
+  @@index([price])
+  @@index([dietaryType])
+}
+
+model MenuItemAddon {
+  id           String  @id @default(uuid())
+  menuItemId   String
+  name         String
+  price        Decimal
+  availability Boolean @default(true)
+
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  cartItems CartItemAddon[]
+  orderItems OrderItemAddon[]
+}
+
+model Cart {
+  id                String @id @default(uuid())
+  customerProfileId String @unique
+  restaurantId      String?
+
+  customerProfile CustomerProfile @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+  restaurant      Restaurant?     @relation(fields: [restaurantId], references: [id], onDelete: SetNull)
+  items           CartItem[]
+}
+
+model CartItem {
+  id         String @id @default(uuid())
+  cartId     String
+  menuItemId String
+  quantity   Int    @default(1)
+
+  cart     Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  addons   CartItemAddon[]
+}
+
+model CartItemAddon {
+  id              String @id @default(uuid())
+  cartItemId      String
+  menuItemAddonId String
+
+  cartItem      CartItem      @relation(fields: [cartItemId], references: [id], onDelete: Cascade)
+  menuItemAddon MenuItemAddon @relation(fields: [menuItemAddonId], references: [id], onDelete: Restrict)
+
+  @@unique([cartItemId, menuItemAddonId])
+}
+
+model Order {
+  id                String      @id @default(uuid())
+  customerProfileId String
+  restaurantId      String
+  subtotal          Decimal
+  total             Decimal
+  status            OrderStatus @default(PENDING)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  customerProfile CustomerProfile      @relation(fields: [customerProfileId], references: [id], onDelete: Restrict)
+  restaurant      Restaurant           @relation(fields: [restaurantId], references: [id], onDelete: Restrict)
+  items           OrderItem[]
+  payment         Payment?
+  statusHistory   OrderStatusHistory[]
+  reviews         Review[]
+
+  @@index([customerProfileId])
+  @@index([restaurantId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id              String  @id @default(uuid())
+  orderId         String
+  menuItemId      String
+  nameSnapshot    String
+  quantity        Int     @default(1)
+  historicalPrice Decimal
+  lineTotal       Decimal
+  notes           String?
+
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+  addons   OrderItemAddon[]
+}
+
+model OrderItemAddon {
+  id              String  @id @default(uuid())
+  orderItemId     String
+  menuItemAddonId String
+  nameSnapshot    String
+  priceSnapshot   Decimal
+
+  orderItem       OrderItem     @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  menuItemAddon   MenuItemAddon @relation(fields: [menuItemAddonId], references: [id], onDelete: Restrict)
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  orderId           String        @unique
+  provider          String        @default("STRIPE")
+  providerPaymentId String?       @unique
+  status            PaymentStatus @default(CREATED)
+  amount            Decimal
+  currency          String        @default("INR")
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model OrderStatusHistory {
+  id             String      @id @default(uuid())
+  orderId        String
+  previousStatus OrderStatus?
+  newStatus      OrderStatus
+  changedById    String?
+  timestamp      DateTime    @default(now())
+
+  order     Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  changedBy User? @relation(fields: [changedById], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+}
+
+model Review {
+  id                String   @id @default(uuid())
+  customerProfileId String
+  orderId           String
+  restaurantId      String
+  rating            Int
+  comment           String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  customerProfile CustomerProfile @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+  order           Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  restaurant      Restaurant      @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([customerProfileId, orderId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
