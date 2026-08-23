@@ -43,22 +43,28 @@ export default function Contact() {
     setErrorMessage("");
 
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
         body: JSON.stringify({
+          access_key: "d3bacfeb-d6c3-49aa-bf4c-ef87f4e7c447",
           name: formData.name,
           email: formData.email,
-          service: formData.service,
-          budget: selectedBudget,
-          details: formData.details,
+          subject: `🚀 New Project Inquiry from ${formData.name} (${formData.service})`,
+          from_name: "FreeWheel Inquiries",
+          service_category: formData.service,
+          estimated_budget: selectedBudget,
+          message: formData.details,
         }),
       });
 
       const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to submit project request.");
+      if (!data.success) {
+        throw new Error(data.message || "Failed to submit project request.");
       }
 
       setIsSubmitted(true);
