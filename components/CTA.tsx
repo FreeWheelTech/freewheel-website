@@ -9,8 +9,8 @@ export const CTA = () => {
   return (
     <section className="py-32 relative overflow-hidden">
       {/* Background elements */}
-      <div className="absolute inset-0 bg-primary/[0.03] border-y border-primary/15" />
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-primary/10 rounded-full blur-[140px] -z-10 pointer-events-none" />
+      <div className="absolute inset-0 bg-primary/[0.02] border-y border-primary/15" />
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-primary/[0.04] rounded-full blur-[160px] -z-10 pointer-events-none" />
 
       {/* Grid Pattern */}
       <div

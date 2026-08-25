@@ -62,8 +62,8 @@ export default function About() {
   return (
     <>
       <section className="pt-36 pb-24 relative overflow-hidden">
-        {/* Ambient background glows */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-primary/10 rounded-full blur-[160px] -z-10 pointer-events-none" />
+        {/* Ambient background atmosphere */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-primary/[0.04] rounded-full blur-[160px] -z-10 pointer-events-none" />
 
         <div className="container mx-auto px-6 max-w-5xl text-center">
           {/* Header Badge */}

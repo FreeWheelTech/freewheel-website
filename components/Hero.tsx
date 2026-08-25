@@ -9,9 +9,9 @@ import { ArrowRight, Code2 } from "lucide-react";
 export const Hero = () => {
   return (
     <section className="relative min-h-[92vh] flex items-center pt-28 pb-16 overflow-hidden">
-      {/* Dynamic Background Glows */}
-      <div className="absolute top-1/4 left-1/6 w-[450px] h-[450px] bg-primary/15 rounded-full blur-[140px] -z-10 animate-pulse-subtle" />
-      <div className="absolute bottom-1/4 right-1/6 w-[550px] h-[550px] bg-primary-bright/10 rounded-full blur-[160px] -z-10 animate-pulse-subtle" />
+      {/* Ambient Warm Atmosphere */}
+      <div className="absolute top-1/4 left-1/6 w-[450px] h-[450px] bg-primary/[0.06] rounded-full blur-[160px] -z-10 pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/6 w-[550px] h-[550px] bg-primary-bright/[0.04] rounded-full blur-[180px] -z-10 pointer-events-none" />
 
       {/* Subtle Mesh Grid */}
       <div

@@ -48,11 +48,11 @@ export const MagneticButton = React.forwardRef<HTMLButtonElement, MagneticButton
 
     const variantStyles = {
       primary:
-        "bg-gradient-to-r from-primary to-primary-bright text-primary-foreground font-semibold shadow-[0_4px_20px_rgba(8,124,255,0.35)] hover:shadow-[0_6px_25px_rgba(0,195,255,0.5)] hover:brightness-105 active:scale-[0.98]",
+        "bg-gradient-to-r from-primary to-primary-bright text-primary-foreground font-semibold shadow-[0_4px_16px_rgba(212,175,55,0.22)] hover:shadow-[0_6px_22px_rgba(212,175,55,0.35)] hover:brightness-105 active:scale-[0.98]",
       secondary:
         "bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border/80 shadow-sm active:scale-[0.98]",
       outline:
-        "border border-primary/40 bg-background/50 backdrop-blur-sm text-primary hover:border-primary hover:bg-primary/10 shadow-[0_0_15px_rgba(8,124,255,0.08)] active:scale-[0.98]",
+        "border border-primary/40 bg-background/50 backdrop-blur-sm text-primary hover:border-primary hover:bg-primary/10 shadow-[0_0_15px_rgba(212,175,55,0.06)] active:scale-[0.98]",
       ghost:
         "text-foreground hover:text-primary hover:bg-primary/5 active:scale-[0.98]",
     };

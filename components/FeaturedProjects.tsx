@@ -11,8 +11,8 @@ export const FeaturedProjects = () => {
 
   return (
     <section className="py-28 relative overflow-hidden">
-      {/* Ambient background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[160px] -z-10 pointer-events-none" />
+      {/* Ambient background blend */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/[0.04] rounded-full blur-[160px] -z-10 pointer-events-none" />
 
       <div className="container mx-auto px-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
@@ -72,7 +72,7 @@ export const FeaturedProjects = () => {
                   </div>
 
                   {/* Corner action preview */}
-                  <div className="absolute bottom-4 right-4 w-9 h-9 rounded-full bg-primary/90 text-white flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-lg shadow-primary/30">
+                  <div className="absolute bottom-4 right-4 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-lg shadow-primary/25">
                     <ExternalLink className="w-4 h-4" />
                   </div>
                 </div>

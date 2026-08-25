@@ -56,7 +56,7 @@ export const ServicesOverview = () => {
               className="glass-card p-7 rounded-2xl flex flex-col justify-between group glass-card-hover"
             >
               <div>
-                <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-5 text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-5 text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all">
                   <service.icon className="w-6 h-6" />
                 </div>
 

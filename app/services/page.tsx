@@ -36,7 +36,7 @@ export default function Services() {
   return (
     <>
       <section className="pt-36 pb-16 relative overflow-hidden">
-        <div className="absolute top-1/2 right-0 w-[550px] h-[550px] bg-primary/10 rounded-full blur-[140px] -z-10 pointer-events-none" />
+        <div className="absolute top-1/2 right-0 w-[550px] h-[550px] bg-primary/[0.04] rounded-full blur-[160px] -z-10 pointer-events-none" />
         <div className="container mx-auto px-6 text-center max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

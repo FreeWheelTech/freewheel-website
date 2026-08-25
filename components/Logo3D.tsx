@@ -73,42 +73,42 @@ function Logo3DMesh() {
   return (
     <Float speed={2.5} rotationIntensity={0.35} floatIntensity={1.0}>
       <group ref={groupRef} position={[0, 0, 0]} scale={1.25}>
-        {/* Top Bar - Cyan Neon Metal */}
+        {/* Top Bar - 24K Polished Gold */}
         <mesh geometry={topBarGeom} castShadow receiveShadow>
           <meshStandardMaterial
-            color="#00D2FF"
-            emissive="#0077CC"
-            emissiveIntensity={0.45}
-            metalness={0.9}
-            roughness={0.15}
+            color="#E5C06E"
+            emissive="#3A2D0C"
+            emissiveIntensity={0.15}
+            metalness={0.95}
+            roughness={0.12}
           />
         </mesh>
 
-        {/* Left Wing - Electric Blue */}
+        {/* Left Wing - Champagne Gold */}
         <mesh geometry={leftWingGeom} castShadow receiveShadow>
           <meshStandardMaterial
-            color="#087CFF"
-            emissive="#0044BB"
-            emissiveIntensity={0.4}
-            metalness={0.88}
-            roughness={0.18}
+            color="#F5E6C8"
+            emissive="#2D230B"
+            emissiveIntensity={0.12}
+            metalness={0.92}
+            roughness={0.14}
           />
         </mesh>
 
-        {/* Right Wing - Gradient Sapphire Cyan */}
+        {/* Right Wing - Rich Burnished Gold */}
         <mesh geometry={rightWingGeom} castShadow receiveShadow>
           <meshStandardMaterial
-            color="#00A8FF"
-            emissive="#0055DD"
-            emissiveIntensity={0.4}
-            metalness={0.9}
-            roughness={0.15}
+            color="#D4AF37"
+            emissive="#3D2E0B"
+            emissiveIntensity={0.15}
+            metalness={0.96}
+            roughness={0.12}
           />
         </mesh>
 
-        {/* Internal Core Light Flares */}
-        <pointLight position={[0, 0.2, 0.8]} intensity={2.8} color="#00E5FF" distance={5} />
-        <pointLight position={[-0.8, -0.4, 0.6]} intensity={2.0} color="#087CFF" distance={4} />
+        {/* Internal Core Accent Flares */}
+        <pointLight position={[0, 0.2, 0.8]} intensity={1.8} color="#FFE6A3" distance={5} />
+        <pointLight position={[-0.8, -0.4, 0.6]} intensity={1.4} color="#D4AF37" distance={4} />
       </group>
     </Float>
   );
@@ -118,17 +118,17 @@ export const Logo3D = () => {
   return (
     <div className="w-full h-full min-h-[380px] lg:min-h-[550px] relative">
       <Canvas camera={{ position: [0, 0, 6.5], fov: 45 }}>
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[6, 8, 5]} intensity={2.0} color="#ffffff" />
-        <directionalLight position={[-6, -4, -3]} intensity={1.2} color="#087CFF" />
-        <directionalLight position={[0, 5, -5]} intensity={0.8} color="#00D2FF" />
+        <ambientLight intensity={0.7} />
+        <directionalLight position={[6, 8, 5]} intensity={2.4} color="#FFFBF0" />
+        <directionalLight position={[-6, -4, -3]} intensity={1.2} color="#E5C06E" />
+        <directionalLight position={[0, 5, -5]} intensity={0.9} color="#FFFFFF" />
 
         <Logo3DMesh />
-        <Sparkles count={60} scale={7.0} size={2.5} speed={0.4} opacity={0.7} color="#00D2FF" />
+        <Sparkles count={40} scale={6.5} size={2.0} speed={0.3} opacity={0.6} color="#F3E5AB" />
       </Canvas>
 
-      {/* Ambient background blend glow */}
-      <div className="absolute inset-0 bg-primary/10 blur-[130px] -z-10 rounded-full pointer-events-none" />
+      {/* Ambient background blend */}
+      <div className="absolute inset-0 bg-primary/5 blur-[120px] -z-10 rounded-full pointer-events-none" />
     </div>
   );
 };

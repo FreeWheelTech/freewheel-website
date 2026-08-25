@@ -85,9 +85,9 @@ export default function Contact() {
 
   return (
     <section className="pt-36 pb-28 relative overflow-hidden min-h-screen">
-      {/* Background Glows */}
-      <div className="absolute top-1/4 left-0 w-[550px] h-[550px] bg-primary/10 rounded-full blur-[140px] -z-10 pointer-events-none" />
-      <div className="absolute bottom-1/4 right-0 w-[550px] h-[550px] bg-primary-bright/10 rounded-full blur-[140px] -z-10 pointer-events-none" />
+      {/* Background Atmosphere */}
+      <div className="absolute top-1/4 left-0 w-[550px] h-[550px] bg-primary/[0.04] rounded-full blur-[160px] -z-10 pointer-events-none" />
+      <div className="absolute bottom-1/4 right-0 w-[550px] h-[550px] bg-primary-bright/[0.03] rounded-full blur-[160px] -z-10 pointer-events-none" />
 
       <div className="container mx-auto px-6 max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
@@ -117,7 +117,7 @@ export default function Contact() {
               {/* Email Card with Copy button */}
               <div className="glass-card p-5 rounded-2xl flex items-center justify-between group hover:border-primary/40 transition-all">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-primary/10 rounded-xl text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                  <div className="p-3 bg-primary/10 rounded-xl text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                     <Mail className="w-5 h-5" />
                   </div>
                   <div>
@@ -144,7 +144,7 @@ export default function Contact() {
 
               {/* Global Remote Card */}
               <div className="glass-card p-5 rounded-2xl flex items-center gap-4 group hover:border-primary/40 transition-all">
-                <div className="p-3 bg-primary/10 rounded-xl text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                <div className="p-3 bg-primary/10 rounded-xl text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
@@ -176,7 +176,7 @@ export default function Contact() {
           >
             <div className="glass-card p-8 sm:p-10 rounded-3xl border-border/80 shadow-2xl relative overflow-hidden">
               {/* Subtle top accent */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary-bright to-sky-400" />
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary-bright to-[#B8860B]" />
 
               {isSubmitted ? (
                 <motion.div
@@ -281,7 +281,7 @@ export default function Contact() {
                           onClick={() => setSelectedBudget(opt)}
                           className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
                             selectedBudget === opt
-                              ? "bg-primary text-white border-primary shadow-sm shadow-primary/20"
+                              ? "bg-primary text-primary-foreground font-semibold border-primary shadow-sm shadow-primary/20"
                               : "bg-background border-border/80 text-muted-foreground hover:text-foreground hover:border-primary/40"
                           }`}
                         >

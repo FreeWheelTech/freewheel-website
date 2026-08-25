@@ -18,8 +18,8 @@ export default function Projects() {
   return (
     <>
       <section className="pt-36 pb-14 relative overflow-hidden">
-        {/* Background glow */}
-        <div className="absolute top-1/2 left-0 w-[550px] h-[550px] bg-primary/10 rounded-full blur-[140px] -z-10 pointer-events-none" />
+        {/* Ambient background blend */}
+        <div className="absolute top-1/2 left-0 w-[550px] h-[550px] bg-primary/[0.04] rounded-full blur-[160px] -z-10 pointer-events-none" />
 
         <div className="container mx-auto px-6 text-center max-w-4xl">
           <motion.div
@@ -117,7 +117,7 @@ export default function Projects() {
                         {project.category}
                       </div>
 
-                      <div className="absolute bottom-4 right-4 w-9 h-9 rounded-full bg-primary/90 text-white flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-lg shadow-primary/30">
+                      <div className="absolute bottom-4 right-4 w-9 h-9 rounded-full bg-primary text-primary-foreground font-semibold flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-lg shadow-primary/25">
                         <ExternalLink className="w-4 h-4" />
                       </div>
                     </div>

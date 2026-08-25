@@ -29,7 +29,7 @@ export const Logo: React.FC<LogoProps> = ({
         width={currentSize.width}
         height={currentSize.height}
         priority
-        className="w-auto h-9 sm:h-11 object-contain drop-shadow-[0_0_12px_rgba(0,180,255,0.3)] filter"
+        className="w-auto h-9 sm:h-11 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_2px_10px_rgba(212,175,55,0.15)] filter"
       />
     </div>
   );

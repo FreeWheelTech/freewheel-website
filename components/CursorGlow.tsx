@@ -37,9 +37,9 @@ export const CursorGlow = () => {
 
   return (
     <>
-      {/* Outer ambient glow */}
+      {/* Subtle ambient luxury highlight */}
       <motion.div
-        className="pointer-events-none fixed left-0 top-0 z-40 h-[380px] w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 dark:bg-primary/[0.08] blur-[90px]"
+        className="pointer-events-none fixed left-0 top-0 z-30 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/[0.04] dark:bg-primary/[0.05] blur-[100px]"
         animate={{
           x: mousePosition.x,
           y: mousePosition.y,
@@ -49,20 +49,6 @@ export const CursorGlow = () => {
           stiffness: 120,
           damping: 28,
           mass: 0.3,
-        }}
-      />
-      {/* Inner focused core */}
-      <motion.div
-        className="pointer-events-none fixed left-0 top-0 z-40 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-bright/15 dark:bg-primary-bright/10 blur-[45px]"
-        animate={{
-          x: mousePosition.x,
-          y: mousePosition.y,
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 180,
-          damping: 24,
-          mass: 0.15,
         }}
       />
     </>

@@ -7,8 +7,8 @@ import { Users, Mail, Globe } from "lucide-react";
 export const Team = () => {
   return (
     <section className="py-28 relative bg-secondary/30 dark:bg-background/40 border-t border-border/80 overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute top-1/2 right-1/4 w-[450px] h-[450px] bg-primary/10 rounded-full blur-[140px] -z-10 pointer-events-none" />
+      {/* Ambient background blend */}
+      <div className="absolute top-1/2 right-1/4 w-[450px] h-[450px] bg-primary/[0.04] rounded-full blur-[160px] -z-10 pointer-events-none" />
 
       <div className="container mx-auto px-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
