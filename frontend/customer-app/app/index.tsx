@@ -1,121 +1,304 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, ActivityIndicator, Image, SafeAreaView } from 'react-native';
 import { useRestaurants, useCategories, useMenu } from '../src/hooks/useMenu';
 import { useCart } from '../src/hooks/useCart';
-import { useAuth } from '../src/context/AuthContext';
 import { useRouter } from 'expo-router';
-import { useDebounce } from '../src/hooks/useDebounce';
+import { useTheme } from '@/hooks/use-theme';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 
-export default function Home() {
-  const { logout } = useAuth();
+export default function MenuScreen() {
   const router = useRouter();
+  const theme = useTheme();
   
-  const { data: restaurantsData, isLoading: isRestLoading, isError: isRestError, refetch } = useRestaurants('');
-  const restaurants = restaurantsData?.pages.flatMap(p => p.data) || [];
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const { data: cart } = useCart();
+  // Fetch the first restaurant (BYTE CAFE)
+  const { data: restaurantsData, isLoading: isRestLoading } = useRestaurants('');
+  const restaurantId = restaurantsData?.pages[0]?.data?.[0]?.id;
 
-  if (isRestLoading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#FFD700" />
-      </View>
-    );
-  }
+  const { data: categoriesData } = useCategories(restaurantId);
+  const categories = [{ name: 'All', id: 'all' }, ...(categoriesData || [])];
 
-  if (isRestError) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>Unable to load restaurants</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
-          <Text style={styles.retryText}>Retry</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  const { data: menuData, isLoading: isMenuLoading, fetchNextPage, hasNextPage } = useMenu(
+    restaurantId, 
+    selectedCategory === 'All' ? undefined : selectedCategory, 
+    searchQuery
+  );
+  
+  const menuItems = useMemo(() => {
+    return menuData?.pages.flatMap(p => p.data) || [];
+  }, [menuData]);
 
-  const renderRestaurant = ({ item }: { item: any }) => (
+  const groupedMenu = useMemo(() => {
+    if (selectedCategory !== 'All') {
+      return [{ category: selectedCategory, data: menuItems }];
+    }
+    const grouped: Record<string, any[]> = {};
+    menuItems.forEach(item => {
+      const cat = item.category?.name || 'Uncategorized';
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(item);
+    });
+    return Object.entries(grouped).map(([category, data]) => ({ category, data }));
+  }, [menuItems, selectedCategory]);
+
+  const renderMenuItem = (item: any) => (
     <TouchableOpacity 
-      style={styles.restaurantCard}
-      onPress={() => router.push(`/restaurant/${item.id}` as any)}
+      key={item.id}
+      style={[styles.menuItemCard, { backgroundColor: theme.card }]}
+      onPress={() => router.push(`/item/${item.id}` as any)}
     >
-      <View style={styles.restaurantContent}>
-        <Text style={styles.restaurantName}>{item.name}</Text>
-        <Text style={styles.restaurantAddress}>{item.description}</Text>
-        <Text style={styles.ratingSummary}>
-          ★ {item.averageRating ? Number(item.averageRating).toFixed(1) : 'New'} ({item.reviewCount || 0} reviews)
-        </Text>
+      <View style={styles.menuItemContent}>
+        <View style={styles.menuItemInfo}>
+          <Text style={[styles.menuItemName, { color: theme.text }]}>
+            {item.name} {item.dietaryType === 'VEG' ? '🟩' : '🟥'}
+          </Text>
+          <Text style={[styles.menuItemDesc, { color: theme.textSecondary }]} numberOfLines={2}>
+            {item.description || 'Delicious byte cafe special.'}
+          </Text>
+        </View>
+        <View style={styles.menuItemRight}>
+          <Text style={[styles.menuItemPrice, { color: theme.text }]}>₹{item.price}</Text>
+          <TouchableOpacity style={[styles.addBtn, { backgroundColor: theme.primary }]}>
+            <Text style={[styles.addBtnText, { color: theme.primaryText }]}>+</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </TouchableOpacity>
   );
 
+  if (isRestLoading) {
+    return (
+      <View style={[styles.center, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.accent} />
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>BYTE++ FOOD</Text>
-        <View style={{flexDirection: 'row', gap: 15, alignItems: 'center'}}>
-          <TouchableOpacity onPress={() => router.push('/orders')}>
-            <Text style={styles.cartHeaderBtn}>Orders</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/cart')}>
-            <Text style={styles.cartHeaderBtn}>Cart {cart?.itemCount ? `(${cart.itemCount})` : ''}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={logout}><Text style={styles.logoutText}>Logout</Text></TouchableOpacity>
+        <TouchableOpacity>
+          <Text style={{ fontSize: 24, color: theme.text }}>≡</Text>
+        </TouchableOpacity>
+        <View style={styles.headerTitles}>
+          <Text style={[styles.headerTitle, { color: theme.text }]}>BYTE++ Café</Text>
+          <Text style={[styles.headerSub, { color: theme.primary }]}>CODE • EAT • REPEAT</Text>
         </View>
+        <TouchableOpacity onPress={() => router.push('/notifications')}>
+          <Text style={{ fontSize: 24, color: theme.text }}>🔔</Text>
+        </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.searchInputContainer} onPress={() => router.push('/search')}>
-        <Text style={styles.searchPlaceholder}>🔍 Search restaurants and food...</Text>
-      </TouchableOpacity>
+      <Text style={[styles.screenTitle, { color: theme.text }]}>Menu</Text>
 
-      <FlatList
-        data={restaurants}
-        keyExtractor={(item) => item.id}
-        renderItem={renderRestaurant}
-        contentContainerStyle={styles.listContainer}
-        ListEmptyComponent={<Text style={styles.emptyText}>No restaurants available.</Text>}
-      />
-    </View>
+      {/* Search */}
+      <View style={styles.searchContainer}>
+        <View style={[styles.searchInputWrapper, { backgroundColor: theme.backgroundElement }]}>
+          <Text style={{ marginRight: 8 }}>🔍</Text>
+          <TextInput
+            style={[styles.searchInput, { color: theme.text }]}
+            placeholder="Search for items..."
+            placeholderTextColor={theme.textSecondary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+        <TouchableOpacity style={[styles.filterBtn, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+          <Text style={{ color: theme.text }}>⚡ Filter</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Categories */}
+      <View style={styles.categoriesWrapper}>
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={categories}
+          keyExtractor={(c) => c.id || c.name}
+          renderItem={({ item }) => {
+            const isSelected = selectedCategory === item.name;
+            return (
+              <TouchableOpacity
+                style={[
+                  styles.categoryPill,
+                  { backgroundColor: isSelected ? theme.accent : theme.backgroundElement },
+                  !isSelected && { borderWidth: 1, borderColor: theme.border }
+                ]}
+                onPress={() => setSelectedCategory(item.name)}
+              >
+                <Text style={{ color: isSelected ? '#FFFFFF' : theme.text, fontWeight: isSelected ? 'bold' : 'normal' }}>
+                  {item.name}
+                </Text>
+              </TouchableOpacity>
+            );
+          }}
+          contentContainerStyle={styles.categoriesContainer}
+        />
+      </View>
+
+      {/* Menu Items */}
+      {isMenuLoading ? (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={theme.accent} />
+        </View>
+      ) : (
+        <FlatList
+          data={groupedMenu}
+          keyExtractor={(item) => item.category}
+          renderItem={({ item: group }) => (
+            <View style={styles.groupContainer}>
+              <View style={styles.groupHeader}>
+                <Text style={[styles.groupTitle, { color: theme.text }]}>{group.category}</Text>
+                <TouchableOpacity>
+                  <Text style={[styles.viewAll, { color: theme.accent }]}>View All →</Text>
+                </TouchableOpacity>
+              </View>
+              {group.data.map(renderMenuItem)}
+            </View>
+          )}
+          contentContainerStyle={styles.menuList}
+          onEndReached={() => {
+            if (hasNextPage) fetchNextPage();
+          }}
+          onEndReachedThreshold={0.5}
+        />
+      )}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  container: { flex: 1 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', padding: 20, backgroundColor: '#fff', paddingTop: 60 },
-  title: { fontSize: 24, fontWeight: 'bold' },
-  cartHeaderBtn: { fontSize: 16, fontWeight: 'bold', color: '#0066cc', marginTop: 8 },
-  logoutText: { color: 'red', marginTop: 8 },
-  restaurantInfo: { padding: 20, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#eee' },
-  restaurantName: { fontSize: 20, fontWeight: 'bold' },
-  restaurantAddress: {
-    fontSize: 14,
-    color: '#888',
-    marginTop: 5,
+  header: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center',
+    paddingHorizontal: 20, 
+    paddingTop: 10,
+    marginBottom: 10
   },
-  ratingSummary: {
-    fontSize: 16,
-    color: '#FFD700',
-    marginTop: 8,
+  headerTitles: { alignItems: 'center' },
+  headerTitle: { fontSize: 20, fontWeight: '900' },
+  headerSub: { fontSize: 10, fontWeight: 'bold', letterSpacing: 1 },
+  screenTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    gap: 12,
+  },
+  searchInputWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    borderRadius: 24,
+    height: 48,
+  },
+  searchInput: {
+    flex: 1,
+    height: '100%',
+  },
+  filterBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    borderRadius: 24,
+    height: 48,
+    borderWidth: 1,
+  },
+  categoriesWrapper: {
+    marginBottom: 20,
+  },
+  categoriesContainer: {
+    paddingHorizontal: 20,
+    gap: 12,
+  },
+  categoryPill: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuList: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  groupContainer: {
+    marginBottom: 24,
+  },
+  groupHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  groupTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
   },
-  searchInputContainer: {
-    margin: 16,
-    padding: 14,
-    backgroundColor: '#F5F5F5',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E5E5EA',
+  viewAll: {
+    fontSize: 14,
+    fontWeight: '600',
   },
-  searchPlaceholder: {
+  menuItemCard: {
+    borderRadius: 16,
+    marginBottom: 12,
+    padding: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  menuItemContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  menuItemInfo: {
+    flex: 1,
+    marginRight: 16,
+  },
+  menuItemName: {
     fontSize: 16,
-    color: '#8E8E93',
+    fontWeight: '600',
+    marginBottom: 4,
   },
-  restaurantCard: { backgroundColor: '#fff', marginHorizontal: 15, marginBottom: 15, borderRadius: 12, elevation: 3, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 6 },
-  restaurantContent: { padding: 15 },
-  listContainer: { paddingBottom: 20 },
-  errorText: { fontSize: 18, color: 'red', marginBottom: 10 },
-  retryButton: { padding: 10, backgroundColor: '#FFD700', borderRadius: 5 },
-  retryText: { fontWeight: 'bold' },
-  emptyText: { textAlign: 'center', marginTop: 20, color: 'gray' },
+  menuItemDesc: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  menuItemRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  menuItemPrice: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  addBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addBtnText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: -2,
+  }
 });

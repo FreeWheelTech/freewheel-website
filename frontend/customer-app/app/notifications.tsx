@@ -1,10 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead } from '../src/hooks/useNotifications';
+import { useTheme } from '@/hooks/use-theme';
 
 export default function NotificationsScreen() {
   const router = useRouter();
+  const theme = useTheme();
   const { data: notifications, isLoading, isError, error } = useNotifications();
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
@@ -23,44 +25,53 @@ export default function NotificationsScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#FF3B30" />
+      <View style={[styles.centerContainer, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.accent} />
       </View>
     );
   }
 
   if (isError) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>Error loading notifications.</Text>
+      <View style={[styles.centerContainer, { backgroundColor: theme.background }]}>
+        <Text style={[styles.errorText, { color: theme.error }]}>Error loading notifications.</Text>
       </View>
     );
   }
 
   const renderNotification = ({ item }: { item: any }) => (
     <TouchableOpacity 
-      style={[styles.notificationCard, !item.isRead && styles.unreadCard]}
+      style={[
+        styles.notificationCard, 
+        { backgroundColor: theme.card },
+        !item.isRead && { backgroundColor: theme.accent + '10', borderColor: theme.accent, borderWidth: 1 }
+      ]}
       onPress={() => handleNotificationPress(item)}
       activeOpacity={0.8}
     >
       <View style={styles.notificationHeader}>
-        <Text style={styles.title}>{item.title}</Text>
-        {!item.isRead && <View style={styles.unreadDot} />}
+        <Text style={[styles.title, { color: theme.text }]}>{item.title}</Text>
+        {!item.isRead && <View style={[styles.unreadDot, { backgroundColor: theme.accent }]} />}
       </View>
-      <Text style={styles.message}>{item.message}</Text>
-      <Text style={styles.time}>{new Date(item.createdAt).toLocaleString()}</Text>
+      <Text style={[styles.message, { color: theme.textSecondary }]}>{item.message}</Text>
+      <Text style={[styles.time, { color: theme.textSecondary }]}>{new Date(item.createdAt).toLocaleString()}</Text>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Notifications</Text>
-        {notifications?.some((n: any) => !n.isRead) && (
-          <TouchableOpacity onPress={handleMarkAllRead}>
-            <Text style={styles.markAllText}>Mark all read</Text>
-          </TouchableOpacity>
-        )}
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.background, borderColor: theme.border }]}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Text style={{ fontSize: 24, color: theme.text }}>←</Text>
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, { color: theme.text }]}>Notifications</Text>
+        <View style={{ width: 40 }}>
+          {notifications?.some((n: any) => !n.isRead) && (
+            <TouchableOpacity onPress={handleMarkAllRead}>
+              <Text style={[styles.markAllText, { color: theme.accent }]}>Read All</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <FlatList
@@ -70,18 +81,17 @@ export default function NotificationsScreen() {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No notifications yet.</Text>
+            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>No notifications yet.</Text>
           </View>
         }
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
   },
   centerContainer: {
     flex: 1,
@@ -92,39 +102,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
   },
+  backButton: { width: 40 },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#000000',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   markAllText: {
-    fontSize: 16,
-    color: '#FF3B30',
+    fontSize: 14,
     fontWeight: '600',
   },
   listContent: {
     padding: 16,
   },
   notificationCard: {
-    backgroundColor: '#FFFFFF',
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
-  },
-  unreadCard: {
-    backgroundColor: '#F5F9FF',
-    borderColor: '#007AFF',
-    borderWidth: 1,
   },
   notificationHeader: {
     flexDirection: 'row',
@@ -134,27 +137,22 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#000000',
+    fontWeight: 'bold',
   },
   unreadDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#007AFF',
   },
   message: {
     fontSize: 15,
-    color: '#3A3A3C',
     marginBottom: 8,
     lineHeight: 20,
   },
   time: {
     fontSize: 12,
-    color: '#8E8E93',
   },
   errorText: {
-    color: '#FF3B30',
     fontSize: 16,
   },
   emptyContainer: {
@@ -163,6 +161,5 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#8E8E93',
   }
 });

@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Alert, SafeAreaView, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useCart } from '../src/hooks/useCart';
 import { useCreateOrder } from '../src/hooks/useOrders';
 import { useCreatePayment, useVerifyPayment } from '../src/hooks/usePayments';
 import { useAuth } from '../src/context/AuthContext';
-import { useStripe } from '@stripe/stripe-react-native';
+import { useStripe } from '../src/hooks/useStripeWrapper';
+import { useTheme } from '@/hooks/use-theme';
+import { Button } from '@/components/ui/Button';
 
 export default function CheckoutScreen() {
   const router = useRouter();
+  const theme = useTheme();
   const { data: cart, isLoading: isCartLoading } = useCart();
   const { user } = useAuth();
   const createOrder = useCreateOrder();
@@ -18,15 +21,19 @@ export default function CheckoutScreen() {
 
   const [isProcessing, setIsProcessing] = useState(false);
 
-  if (isCartLoading) return <View style={styles.center}><ActivityIndicator size="large" color="#FFD700" /></View>;
+  if (isCartLoading) {
+    return (
+      <View style={[styles.center, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.accent} />
+      </View>
+    );
+  }
 
   if (!cart || cart.items.length === 0) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>Your cart is empty.</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backText}>Go Back</Text>
-        </TouchableOpacity>
+      <View style={[styles.center, { backgroundColor: theme.background }]}>
+        <Text style={[styles.errorText, { color: theme.error }]}>Your cart is empty.</Text>
+        <Button title="Go Back" onPress={() => router.back()} />
       </View>
     );
   }
@@ -38,7 +45,7 @@ export default function CheckoutScreen() {
       if (!paymentData.clientSecret) throw new Error('Missing client secret');
 
       const { error: initError } = await initPaymentSheet({
-        merchantDisplayName: 'BYTE++ Food',
+        merchantDisplayName: 'BYTE CAFE',
         paymentIntentClientSecret: paymentData.clientSecret,
         returnURL: 'bytefood://stripe-redirect',
       });
@@ -92,83 +99,108 @@ export default function CheckoutScreen() {
   const isLoading = createOrder.isPending || isProcessing;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} disabled={isLoading}><Text style={[styles.headerBack, isLoading && {color: '#ccc'}]}>← Back</Text></TouchableOpacity>
-        <Text style={styles.title}>Checkout</Text>
-        <View style={{width: 40}} />
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.background, borderColor: theme.border }]}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()} disabled={isLoading}>
+          <Text style={{ fontSize: 24, color: isLoading ? theme.textSecondary : theme.text }}>←</Text>
+        </TouchableOpacity>
+        <Text style={[styles.title, { color: theme.text }]}>Checkout</Text>
+        <View style={{ width: 40 }} />
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Order Summary</Text>
+      <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
+        <View style={[styles.section, { backgroundColor: theme.card }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Order Summary</Text>
           {cart.items.map((item: any) => (
             <View key={item.id} style={styles.summaryItem}>
-              <Text style={styles.summaryItemName}>
+              <Text style={[styles.summaryItemName, { color: theme.textSecondary }]}>
                 {item.quantity} × {item.menuItem.name}
               </Text>
-              <Text style={styles.summaryItemPrice}>₹{item.lineTotal}</Text>
+              <Text style={[styles.summaryItemPrice, { color: theme.text }]}>₹{item.lineTotal}</Text>
             </View>
           ))}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
           <View style={styles.summaryRow}>
-            <Text style={styles.totalLabel}>Subtotal</Text>
-            <Text style={styles.totalValue}>₹{cart.subtotal}</Text>
+            <Text style={[styles.totalLabel, { color: theme.textSecondary }]}>Subtotal</Text>
+            <Text style={[styles.totalValue, { color: theme.text }]}>₹{cart.subtotal}</Text>
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Customer Information</Text>
-          <Text style={styles.infoText}>Name: {user?.name}</Text>
-          <Text style={styles.infoText}>Email: {user?.email}</Text>
-          <Text style={styles.infoNote}>* Secure payment powered by Stripe (Test Mode).</Text>
+        <View style={[styles.section, { backgroundColor: theme.card }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Customer Information</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary }]}>Name: {user?.name}</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary }]}>Email: {user?.email}</Text>
+          
+          <View style={[styles.infoNoteBox, { backgroundColor: theme.backgroundElement }]}>
+            <Text style={[styles.infoNote, { color: theme.textSecondary }]}>
+              🔒 Secure payment powered by Stripe (Test Mode).
+            </Text>
+          </View>
         </View>
-      </View>
+      </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: theme.background, borderColor: theme.border }]}>
         <View style={styles.summaryRow}>
-          <Text style={styles.totalLabel}>Order Total</Text>
-          <Text style={styles.totalValue}>₹{cart.subtotal}</Text>
+          <Text style={[styles.totalLabel, { color: theme.text }]}>Order Total</Text>
+          <Text style={[styles.totalValue, { color: theme.text }]}>₹{cart.subtotal}</Text>
         </View>
-        <TouchableOpacity 
-          style={[styles.placeOrderBtn, isLoading && styles.placeOrderBtnDisabled]}
+        <Button 
+          title="Pay Now" 
           onPress={handlePlaceOrder}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#000" />
-          ) : (
-            <Text style={styles.placeOrderText}>Pay Now</Text>
-          )}
-        </TouchableOpacity>
+          isLoading={isLoading}
+          size="large"
+          style={{ marginTop: 16 }}
+        />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  container: { flex: 1 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', padding: 20, paddingTop: 60, backgroundColor: '#fff', borderBottomWidth: 1, borderColor: '#eee' },
-  headerBack: { fontSize: 16, color: '#333' },
+  header: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    paddingHorizontal: 20, 
+    paddingTop: 10,
+    paddingBottom: 15,
+    borderBottomWidth: 1, 
+  },
+  backButton: { width: 40 },
   title: { fontSize: 20, fontWeight: 'bold' },
-  content: { flex: 1, padding: 15 },
-  section: { backgroundColor: '#fff', padding: 15, borderRadius: 10, marginBottom: 15, elevation: 1 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 15 },
-  summaryItem: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  summaryItemName: { fontSize: 16, color: '#333' },
+  content: { flex: 1 },
+  scrollContent: { padding: 20 },
+  section: { 
+    padding: 20, 
+    borderRadius: 16, 
+    marginBottom: 20, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 20 },
+  summaryItem: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
+  summaryItemName: { fontSize: 16, fontWeight: '500' },
   summaryItemPrice: { fontSize: 16, fontWeight: 'bold' },
-  divider: { height: 1, backgroundColor: '#eee', marginVertical: 10 },
+  divider: { height: 1, marginVertical: 16 },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  totalLabel: { fontSize: 18, color: 'gray' },
+  totalLabel: { fontSize: 18 },
   totalValue: { fontSize: 22, fontWeight: 'bold' },
-  infoText: { fontSize: 16, color: '#333', marginBottom: 5 },
-  infoNote: { fontSize: 14, color: '#0066cc', marginTop: 10, fontStyle: 'italic', fontWeight: '500' },
-  footer: { backgroundColor: '#fff', padding: 20, borderTopWidth: 1, borderColor: '#ddd' },
-  placeOrderBtn: { backgroundColor: '#FFD700', padding: 15, borderRadius: 8, alignItems: 'center', marginTop: 15 },
-  placeOrderBtnDisabled: { opacity: 0.7 },
-  placeOrderText: { color: '#000', fontSize: 18, fontWeight: 'bold' },
-  errorText: { fontSize: 18, color: 'red', marginBottom: 10 },
-  backButton: { padding: 10, backgroundColor: '#FFD700', borderRadius: 5 },
-  backText: { fontWeight: 'bold' },
+  infoText: { fontSize: 16, marginBottom: 8 },
+  infoNoteBox: {
+    marginTop: 16,
+    padding: 12,
+    borderRadius: 8,
+  },
+  infoNote: { fontSize: 14, fontWeight: '500' },
+  footer: { 
+    padding: 24, 
+    borderTopWidth: 1, 
+    paddingBottom: 40,
+  },
+  errorText: { fontSize: 18, marginBottom: 16 },
 });

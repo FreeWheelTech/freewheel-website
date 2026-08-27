@@ -3,7 +3,7 @@ import { AuthProvider, useAuth } from '../src/context/AuthContext';
 import { QueryProvider } from '../src/context/QueryProvider';
 import { useEffect } from 'react';
 import { View, Text } from 'react-native';
-import { StripeProvider } from '@stripe/stripe-react-native';
+import { StripeProviderWrapper } from '../src/components/StripeProviderWrapper';
 
 function RootLayoutNav() {
   const { user, isLoading } = useAuth();
@@ -35,12 +35,12 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_mock'}>
+    <StripeProviderWrapper publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_mock'}>
       <QueryProvider>
         <AuthProvider>
           <RootLayoutNav />
         </AuthProvider>
       </QueryProvider>
-    </StripeProvider>
+    </StripeProviderWrapper>
   );
 }

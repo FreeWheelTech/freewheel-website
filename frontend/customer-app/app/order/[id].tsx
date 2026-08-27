@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView, TextInput, Modal, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView, TextInput as RNTextInput, Modal, Alert, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useOrderDetails } from '../../src/hooks/useOrders';
 import { useCreateReview, useUpdateReview, useDeleteReview } from '../../src/hooks/useReviews';
+import { useTheme } from '@/hooks/use-theme';
+import { Button } from '@/components/ui/Button';
 
 export default function OrderDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const theme = useTheme();
   const { data: order, isLoading, isError } = useOrderDetails(id);
   
   const [isReviewModalVisible, setReviewModalVisible] = useState(false);
@@ -52,92 +55,94 @@ export default function OrderDetailsScreen() {
     ]);
   };
 
-  if (isLoading) return <View style={styles.center}><ActivityIndicator size="large" color="#FFD700" /></View>;
+  if (isLoading) {
+    return (
+      <View style={[styles.center, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.accent} />
+      </View>
+    );
+  }
 
   if (isError || !order) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>Unable to load order</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/')}>
-          <Text style={styles.backText}>Go Home</Text>
-        </TouchableOpacity>
+      <View style={[styles.center, { backgroundColor: theme.background }]}>
+        <Text style={[styles.errorText, { color: theme.error }]}>Unable to load order</Text>
+        <Button title="Go Home" onPress={() => router.push('/')} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push('/')}><Text style={styles.headerBack}>Home</Text></TouchableOpacity>
-        <Text style={styles.title}>Order Details</Text>
-        <View style={{width: 40}} />
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.background, borderColor: theme.border }]}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/')}>
+          <Text style={{ fontSize: 24, color: theme.text }}>←</Text>
+        </TouchableOpacity>
+        <Text style={[styles.title, { color: theme.text }]}>Order Details</Text>
+        <View style={{ width: 40 }} />
       </View>
 
       <ScrollView style={styles.content}>
-        <View style={styles.successBanner}>
-          <Text style={styles.successText}>Order {order.status}!</Text>
-          <Text style={styles.orderId}>ID: {order.id}</Text>
-          <Text style={styles.dateText}>{new Date(order.createdAt).toLocaleString()}</Text>
+        <View style={[styles.successBanner, { backgroundColor: theme.success + '20' }]}>
+          <Text style={[styles.successText, { color: theme.success }]}>Order {order.status}!</Text>
+          <Text style={[styles.orderId, { color: theme.textSecondary }]}>ID: {order.id}</Text>
+          <Text style={[styles.dateText, { color: theme.textSecondary }]}>{new Date(order.createdAt).toLocaleString()}</Text>
           {order.payment && (
-            <View style={styles.paymentBadge}>
-              <Text style={styles.paymentBadgeText}>Payment: {order.payment.status}</Text>
-              {order.payment.providerPaymentId && <Text style={styles.paymentIdText}>Ref: {order.payment.providerPaymentId}</Text>}
+            <View style={[styles.paymentBadge, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <Text style={[styles.paymentBadgeText, { color: theme.text }]}>Payment: {order.payment.status}</Text>
+              {order.payment.providerPaymentId && <Text style={[styles.paymentIdText, { color: theme.textSecondary }]}>Ref: {order.payment.providerPaymentId}</Text>}
             </View>
           )}
           {!order.payment || order.payment.status !== 'SUCCESS' ? (
-             <TouchableOpacity style={styles.retryPayButton} onPress={() => router.push('/checkout')}>
-               <Text style={styles.retryPayText}>Complete Payment</Text>
-             </TouchableOpacity>
+             <Button style={{ marginTop: 16 }} title="Complete Payment" onPress={() => router.push('/checkout')} />
           ) : null}
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{order.restaurant.name}</Text>
+        <View style={[styles.section, { backgroundColor: theme.card }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>{order.restaurant.name}</Text>
           {order.items.map((item: any) => (
             <View key={item.id} style={styles.itemRow}>
               <View>
-                <Text style={styles.itemName}>{item.quantity} × {item.nameSnapshot}</Text>
+                <Text style={[styles.itemName, { color: theme.text }]}>{item.quantity} × {item.nameSnapshot}</Text>
                 {item.addons.map((a: any) => (
-                  <Text key={a.id} style={styles.addonText}>+ {a.nameSnapshot} (₹{a.priceSnapshot})</Text>
+                  <Text key={a.id} style={[styles.addonText, { color: theme.textSecondary }]}>+ {a.nameSnapshot} (₹{a.priceSnapshot})</Text>
                 ))}
               </View>
-              <Text style={styles.itemPrice}>₹{item.lineTotal}</Text>
+              <Text style={[styles.itemPrice, { color: theme.text }]}>₹{item.lineTotal}</Text>
             </View>
           ))}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
           <View style={styles.summaryRow}>
-            <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>₹{order.total}</Text>
+            <Text style={[styles.totalLabel, { color: theme.textSecondary }]}>Total</Text>
+            <Text style={[styles.totalValue, { color: theme.text }]}>₹{order.total}</Text>
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Order Status History</Text>
+        <View style={[styles.section, { backgroundColor: theme.card }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Order Status History</Text>
           {order.statusHistory.map((history: any, index: number) => (
             <View key={history.id} style={styles.historyRow}>
-              <Text style={styles.historyStatus}>{history.newStatus}</Text>
-              <Text style={styles.historyTime}>{new Date(history.timestamp).toLocaleTimeString()}</Text>
+              <Text style={[styles.historyStatus, { color: theme.text }]}>{history.newStatus}</Text>
+              <Text style={[styles.historyTime, { color: theme.textSecondary }]}>{new Date(history.timestamp).toLocaleTimeString()}</Text>
             </View>
           ))}
         </View>
 
         {order.status === 'COMPLETED' && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Reviews & Ratings</Text>
+          <View style={[styles.section, { backgroundColor: theme.card }]}>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Reviews & Ratings</Text>
             {order.reviews && order.reviews.length > 0 ? (
-              <View style={styles.existingReview}>
-                <Text style={styles.myReviewLabel}>Your Review</Text>
-                <Text style={styles.stars}>{'★'.repeat(order.reviews[0].rating)}{'☆'.repeat(5 - order.reviews[0].rating)}</Text>
-                {order.reviews[0].comment ? <Text style={styles.reviewComment}>{order.reviews[0].comment}</Text> : null}
+              <View style={[styles.existingReview, { backgroundColor: theme.backgroundElement }]}>
+                <Text style={[styles.myReviewLabel, { color: theme.textSecondary }]}>Your Review</Text>
+                <Text style={[styles.stars, { color: theme.accent }]}>{'★'.repeat(order.reviews[0].rating)}{'☆'.repeat(5 - order.reviews[0].rating)}</Text>
+                {order.reviews[0].comment ? <Text style={[styles.reviewComment, { color: theme.text }]}>{order.reviews[0].comment}</Text> : null}
                 <View style={styles.reviewActions}>
-                  <TouchableOpacity onPress={() => openReviewModal(order.reviews[0])}><Text style={styles.editAction}>Edit</Text></TouchableOpacity>
-                  <TouchableOpacity onPress={() => handleDeleteReview(order.reviews[0].id)}><Text style={styles.deleteAction}>Delete</Text></TouchableOpacity>
+                  <TouchableOpacity onPress={() => openReviewModal(order.reviews[0])}><Text style={[styles.editAction, { color: theme.accent }]}>Edit</Text></TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleDeleteReview(order.reviews[0].id)}><Text style={[styles.deleteAction, { color: theme.error }]}>Delete</Text></TouchableOpacity>
                 </View>
               </View>
             ) : (
-              <TouchableOpacity style={styles.rateButton} onPress={() => openReviewModal()}>
-                <Text style={styles.rateButtonText}>Rate your order</Text>
-              </TouchableOpacity>
+              <Button title="Rate your order" onPress={() => openReviewModal()} />
             )}
           </View>
         )}
@@ -146,17 +151,18 @@ export default function OrderDetailsScreen() {
 
       <Modal visible={isReviewModalVisible} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{editingReviewId ? 'Edit Review' : 'Rate Your Order'}</Text>
+          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>{editingReviewId ? 'Edit Review' : 'Rate Your Order'}</Text>
             <View style={styles.starContainer}>
               {[1, 2, 3, 4, 5].map((star) => (
                 <TouchableOpacity key={star} onPress={() => setRating(star)}>
-                  <Text style={[styles.starInteractive, rating >= star ? styles.starSelected : styles.starUnselected]}>★</Text>
+                  <Text style={[styles.starInteractive, rating >= star ? { color: theme.accent } : { color: theme.border }]}>★</Text>
                 </TouchableOpacity>
               ))}
             </View>
-            <TextInput
-              style={styles.commentInput}
+            <RNTextInput
+              style={[styles.commentInput, { borderColor: theme.border, color: theme.text, backgroundColor: theme.backgroundElement }]}
+              placeholderTextColor={theme.textSecondary}
               placeholder="Write your review... (optional)"
               multiline
               maxLength={500}
@@ -164,11 +170,11 @@ export default function OrderDetailsScreen() {
               onChangeText={setComment}
             />
             <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.modalCancel} onPress={() => setReviewModalVisible(false)}>
-                <Text style={styles.cancelText}>Cancel</Text>
+              <TouchableOpacity style={[styles.modalCancel, { backgroundColor: theme.backgroundElement }]} onPress={() => setReviewModalVisible(false)}>
+                <Text style={[styles.cancelText, { color: theme.text }]}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                style={[styles.modalSubmit, rating === 0 && { opacity: 0.5 }]} 
+                style={[styles.modalSubmit, { backgroundColor: theme.accent }, rating === 0 && { opacity: 0.5 }]} 
                 onPress={handleReviewSubmit}
                 disabled={rating === 0 || createReview.isPending || updateReview.isPending}
               >
@@ -180,62 +186,62 @@ export default function OrderDetailsScreen() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  container: { flex: 1 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', padding: 20, paddingTop: 60, backgroundColor: '#fff', borderBottomWidth: 1, borderColor: '#eee' },
-  headerBack: { fontSize: 16, color: '#0066cc', fontWeight: 'bold' },
+  header: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    paddingHorizontal: 20, 
+    paddingTop: 10,
+    paddingBottom: 15,
+    borderBottomWidth: 1, 
+  },
+  backButton: { width: 40 },
   title: { fontSize: 20, fontWeight: 'bold' },
   content: { flex: 1, padding: 15 },
-  successBanner: { backgroundColor: '#e6f7eb', padding: 20, borderRadius: 10, alignItems: 'center', marginBottom: 15 },
-  successText: { fontSize: 24, fontWeight: 'bold', color: '#2e7d32', marginBottom: 5 },
-  orderId: { fontSize: 14, color: '#555', marginBottom: 5 },
-  dateText: { fontSize: 14, color: '#777' },
-  section: { backgroundColor: '#fff', padding: 15, borderRadius: 10, marginBottom: 15, elevation: 1 },
+  successBanner: { padding: 20, borderRadius: 16, alignItems: 'center', marginBottom: 15 },
+  successText: { fontSize: 24, fontWeight: 'bold', marginBottom: 5 },
+  orderId: { fontSize: 14, marginBottom: 5 },
+  dateText: { fontSize: 14 },
+  section: { padding: 16, borderRadius: 16, marginBottom: 16, elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 15 },
   itemRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 },
-  itemName: { fontSize: 16, color: '#333', fontWeight: '500' },
+  itemName: { fontSize: 16, fontWeight: '500' },
   itemPrice: { fontSize: 16, fontWeight: 'bold' },
-  addonText: { fontSize: 14, color: 'gray', marginLeft: 15, marginTop: 2 },
-  divider: { height: 1, backgroundColor: '#eee', marginVertical: 10 },
+  addonText: { fontSize: 14, marginLeft: 15, marginTop: 2 },
+  divider: { height: 1, marginVertical: 10 },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  totalLabel: { fontSize: 18, color: 'gray' },
+  totalLabel: { fontSize: 18 },
   totalValue: { fontSize: 22, fontWeight: 'bold' },
   historyRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  historyStatus: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-  historyTime: { fontSize: 14, color: 'gray' },
-  errorText: { fontSize: 18, color: 'red', marginBottom: 10 },
-  backButton: { padding: 10, backgroundColor: '#FFD700', borderRadius: 5 },
-  backText: { fontWeight: 'bold' },
-  paymentBadge: { marginTop: 10, backgroundColor: '#fff', paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: '#ccc', alignItems: 'center' },
-  paymentBadgeText: { fontWeight: 'bold', color: '#333' },
-  paymentIdText: { fontSize: 10, color: 'gray', marginTop: 2 },
-  retryPayButton: { marginTop: 15, backgroundColor: '#FFD700', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
-  retryPayText: { fontWeight: 'bold', fontSize: 16 },
-  rateButton: { backgroundColor: '#FFD700', padding: 15, borderRadius: 8, alignItems: 'center' },
-  rateButtonText: { fontWeight: 'bold', fontSize: 16 },
-  existingReview: { padding: 10, backgroundColor: '#f9f9f9', borderRadius: 8 },
-  myReviewLabel: { fontSize: 12, color: 'gray', marginBottom: 5 },
-  stars: { color: '#FFD700', fontSize: 20 },
-  reviewComment: { marginTop: 5, fontSize: 14, color: '#333' },
-  reviewActions: { flexDirection: 'row', marginTop: 10, gap: 15 },
-  editAction: { color: '#007AFF', fontWeight: 'bold' },
-  deleteAction: { color: 'red', fontWeight: 'bold' },
+  historyStatus: { fontSize: 16, fontWeight: 'bold' },
+  historyTime: { fontSize: 14 },
+  errorText: { fontSize: 18, marginBottom: 16 },
+  paymentBadge: { marginTop: 10, paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20, borderWidth: 1, alignItems: 'center' },
+  paymentBadgeText: { fontWeight: 'bold' },
+  paymentIdText: { fontSize: 10, marginTop: 2 },
+  existingReview: { padding: 12, borderRadius: 12 },
+  myReviewLabel: { fontSize: 12, marginBottom: 5 },
+  stars: { fontSize: 20 },
+  reviewComment: { marginTop: 8, fontSize: 14 },
+  reviewActions: { flexDirection: 'row', marginTop: 12, gap: 15 },
+  editAction: { fontWeight: 'bold' },
+  deleteAction: { fontWeight: 'bold' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
-  modalContent: { backgroundColor: '#fff', padding: 20, borderRadius: 12, width: '90%' },
+  modalContent: { padding: 24, borderRadius: 16, width: '90%' },
   modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
   starContainer: { flexDirection: 'row', justifyContent: 'center', marginBottom: 20, gap: 10 },
   starInteractive: { fontSize: 40 },
-  starSelected: { color: '#FFD700' },
-  starUnselected: { color: '#ccc' },
-  commentInput: { borderWidth: 1, borderColor: '#eee', borderRadius: 8, padding: 15, minHeight: 100, textAlignVertical: 'top', marginBottom: 20 },
-  modalButtons: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
-  modalCancel: { flex: 1, padding: 15, backgroundColor: '#eee', borderRadius: 8, alignItems: 'center' },
-  modalSubmit: { flex: 1, padding: 15, backgroundColor: '#FFD700', borderRadius: 8, alignItems: 'center' },
-  cancelText: { fontWeight: 'bold', color: '#555' },
+  commentInput: { borderWidth: 1, borderRadius: 12, padding: 16, minHeight: 120, textAlignVertical: 'top', marginBottom: 24 },
+  modalButtons: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
+  modalCancel: { flex: 1, padding: 16, borderRadius: 12, alignItems: 'center' },
+  modalSubmit: { flex: 1, padding: 16, borderRadius: 12, alignItems: 'center' },
+  cancelText: { fontWeight: 'bold' },
   submitText: { fontWeight: 'bold', color: '#000' },
 });

@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Alert, ScrollView, SafeAreaView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMenuItem } from '../../src/hooks/useMenu';
 import { useAddToCart } from '../../src/hooks/useCart';
+import { useTheme } from '@/hooks/use-theme';
+import { Button } from '@/components/ui/Button';
 
 export default function ItemDetails() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const theme = useTheme();
   
   const { data: item, isLoading, isError, refetch } = useMenuItem(id as string);
   const addToCartMutation = useAddToCart();
@@ -14,14 +17,22 @@ export default function ItemDetails() {
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
 
-  if (isLoading) return <View style={styles.center}><ActivityIndicator size="large" color="#FFD700" /></View>;
+  if (isLoading) {
+    return (
+      <View style={[styles.center, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.accent} />
+      </View>
+    );
+  }
 
   if (isError || !item) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>Unable to load item details</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}><Text style={styles.retryText}>Retry</Text></TouchableOpacity>
-        <TouchableOpacity style={{ marginTop: 20 }} onPress={() => router.back()}><Text style={{ color: 'blue' }}>Go Back</Text></TouchableOpacity>
+      <View style={[styles.center, { backgroundColor: theme.background }]}>
+        <Text style={[styles.errorText, { color: theme.error }]}>Unable to load item details</Text>
+        <Button title="Retry" onPress={() => refetch()} />
+        <TouchableOpacity style={{ marginTop: 20 }} onPress={() => router.back()}>
+          <Text style={{ color: theme.accent }}>Go Back</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -51,28 +62,31 @@ export default function ItemDetails() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}><Text style={styles.backButton}>← Back</Text></TouchableOpacity>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.background, borderColor: theme.border }]}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Text style={{ fontSize: 24, color: theme.text }}>←</Text>
+        </TouchableOpacity>
+        <View style={{ width: 40 }} />
       </View>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={styles.card}>
-          <Text style={styles.title}>{item.name}</Text>
-          {item.description && <Text style={styles.description}>{item.description}</Text>}
-          <Text style={styles.price}>₹{item.price}</Text>
+        <View style={[styles.card, { backgroundColor: theme.card }]}>
+          <Text style={[styles.title, { color: theme.text }]}>{item.name}</Text>
+          {item.description && <Text style={[styles.description, { color: theme.textSecondary }]}>{item.description}</Text>}
+          <Text style={[styles.price, { color: theme.text }]}>₹{item.price}</Text>
 
           <View style={styles.tagsRow}>
             {item.dietaryType && (
-              <Text style={[styles.dietaryIcon, item.dietaryType === 'VEG' ? styles.veg : styles.nonVeg]}>
+              <Text style={[styles.dietaryIcon, item.dietaryType === 'VEG' ? { color: theme.success } : { color: theme.error }]}>
                 {item.dietaryType === 'VEG' ? '🟢 Vegetarian' : item.dietaryType === 'EGG' ? '🟡 Contains Egg' : '🔴 Non-Vegetarian'}
               </Text>
             )}
-            {!item.availability && <Text style={styles.unavailableText}>Currently Unavailable</Text>}
+            {!item.availability && <Text style={[styles.unavailableText, { color: theme.error }]}>Currently Unavailable</Text>}
           </View>
 
           {item.addons && item.addons.length > 0 && (
-            <View style={styles.addonsContainer}>
-              <Text style={styles.addonsTitle}>Add-ons</Text>
+            <View style={[styles.addonsContainer, { borderColor: theme.border }]}>
+              <Text style={[styles.addonsTitle, { color: theme.text }]}>Add-ons</Text>
               {item.addons.map((addon: any) => (
                 <TouchableOpacity 
                   key={addon.id} 
@@ -82,12 +96,16 @@ export default function ItemDetails() {
                   testID={`addon-${addon.name}`}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={[styles.checkbox, selectedAddons.includes(addon.id) && styles.checkboxSelected]}>
-                      {selectedAddons.includes(addon.id) && <Text style={{color: '#fff', fontSize: 10}}>✓</Text>}
+                    <View style={[
+                      styles.checkbox, 
+                      { borderColor: theme.border },
+                      selectedAddons.includes(addon.id) && { backgroundColor: theme.accent, borderColor: theme.accent }
+                    ]}>
+                      {selectedAddons.includes(addon.id) && <Text style={{color: '#fff', fontSize: 12, fontWeight: 'bold'}}>✓</Text>}
                     </View>
-                    <Text style={[styles.addonName, !addon.availability && styles.disabledText]}>{addon.name}</Text>
+                    <Text style={[styles.addonName, { color: theme.text }, !addon.availability && { color: theme.textSecondary }]}>{addon.name}</Text>
                   </View>
-                  <Text style={[styles.addonPrice, !addon.availability && styles.disabledText]}>+ ₹{addon.price}</Text>
+                  <Text style={[styles.addonPrice, { color: theme.textSecondary }, !addon.availability && { color: theme.textSecondary }]}>+ ₹{addon.price}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -95,60 +113,58 @@ export default function ItemDetails() {
 
           {item.availability && (
             <View style={styles.quantityContainer}>
-              <TouchableOpacity testID="decrement-btn" onPress={() => setQuantity(q => Math.max(1, q - 1))} style={styles.qtyBtn}><Text style={styles.qtyText}>-</Text></TouchableOpacity>
-              <Text style={styles.qtyLabel}>{quantity}</Text>
-              <TouchableOpacity testID="increment-btn" onPress={() => setQuantity(q => Math.min(99, q + 1))} style={styles.qtyBtn}><Text style={styles.qtyText}>+</Text></TouchableOpacity>
+              <TouchableOpacity testID="decrement-btn" onPress={() => setQuantity(q => Math.max(1, q - 1))} style={[styles.qtyBtn, { backgroundColor: theme.backgroundElement }]}>
+                <Text style={[styles.qtyText, { color: theme.text }]}>-</Text>
+              </TouchableOpacity>
+              <Text style={[styles.qtyLabel, { color: theme.text }]}>{quantity}</Text>
+              <TouchableOpacity testID="increment-btn" onPress={() => setQuantity(q => Math.min(99, q + 1))} style={[styles.qtyBtn, { backgroundColor: theme.backgroundElement }]}>
+                <Text style={[styles.qtyText, { color: theme.text }]}>+</Text>
+              </TouchableOpacity>
             </View>
           )}
 
-          <TouchableOpacity 
-            style={[styles.addToCartButton, (!item.availability || addToCartMutation.isPending) && styles.disabledButton]} 
-            disabled={!item.availability || addToCartMutation.isPending}
+          <Button
+            title={item.availability ? 'Add to Cart' : 'Unavailable'}
             onPress={handleAddToCart}
-          >
-            {addToCartMutation.isPending ? (
-              <ActivityIndicator color="#000" />
-            ) : (
-              <Text style={styles.addToCartText}>{item.availability ? 'Add to Cart' : 'Unavailable'}</Text>
-            )}
-          </TouchableOpacity>
+            disabled={!item.availability || addToCartMutation.isPending}
+            loading={addToCartMutation.isPending}
+            style={{ marginTop: 10 }}
+          />
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  scroll: { flexGrow: 1 },
+  container: { flex: 1 },
+  scroll: { flexGrow: 1, padding: 20 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { padding: 20, paddingTop: 60, backgroundColor: '#fff' },
-  backButton: { fontSize: 18, color: '#333' },
-  card: { margin: 15, padding: 20, backgroundColor: '#fff', borderRadius: 10, elevation: 3 },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
-  description: { fontSize: 16, color: 'gray', marginBottom: 10 },
-  price: { fontSize: 22, color: '#444', marginBottom: 15 },
-  tagsRow: { flexDirection: 'row', gap: 15, marginBottom: 20 },
+  header: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    paddingHorizontal: 20, 
+    paddingTop: 10,
+    paddingBottom: 15,
+  },
+  backButton: { width: 40 },
+  card: { padding: 24, borderRadius: 24, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8 },
+  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 12 },
+  description: { fontSize: 16, marginBottom: 16, lineHeight: 24 },
+  price: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
+  tagsRow: { flexDirection: 'row', gap: 15, marginBottom: 24 },
   dietaryIcon: { fontSize: 14, fontWeight: 'bold' },
-  veg: { color: 'green' },
-  nonVeg: { color: 'red' },
-  unavailableText: { color: 'red', fontWeight: 'bold' },
-  addonsContainer: { marginTop: 20, borderTopWidth: 1, borderColor: '#eee', paddingTop: 15 },
-  addonsTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
-  addonItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
-  checkbox: { width: 20, height: 20, borderWidth: 1, borderColor: '#aaa', borderRadius: 4, marginRight: 10, justifyContent: 'center', alignItems: 'center' },
-  checkboxSelected: { backgroundColor: '#FFD700', borderColor: '#FFD700' },
-  addonName: { fontSize: 16 },
-  addonPrice: { fontSize: 16, color: 'gray' },
-  disabledText: { color: '#ccc' },
-  quantityContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginVertical: 20 },
-  qtyBtn: { width: 40, height: 40, backgroundColor: '#eee', justifyContent: 'center', alignItems: 'center', borderRadius: 20 },
-  qtyText: { fontSize: 20, fontWeight: 'bold' },
-  qtyLabel: { fontSize: 20, fontWeight: 'bold', marginHorizontal: 20 },
-  addToCartButton: { marginTop: 10, backgroundColor: '#FFD700', padding: 15, borderRadius: 8, alignItems: 'center' },
-  disabledButton: { backgroundColor: '#ddd' },
-  addToCartText: { fontSize: 16, fontWeight: 'bold', color: '#000' },
-  errorText: { fontSize: 18, color: 'red', marginBottom: 10 },
-  retryButton: { padding: 10, backgroundColor: '#FFD700', borderRadius: 5 },
-  retryText: { fontWeight: 'bold' },
+  unavailableText: { fontWeight: 'bold' },
+  addonsContainer: { marginTop: 8, borderTopWidth: 1, paddingTop: 20, paddingBottom: 10 },
+  addonsTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
+  addonItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  checkbox: { width: 24, height: 24, borderWidth: 1, borderRadius: 6, marginRight: 12, justifyContent: 'center', alignItems: 'center' },
+  addonName: { fontSize: 16, fontWeight: '500' },
+  addonPrice: { fontSize: 16 },
+  quantityContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginVertical: 24 },
+  qtyBtn: { width: 48, height: 48, justifyContent: 'center', alignItems: 'center', borderRadius: 24 },
+  qtyText: { fontSize: 24, fontWeight: 'bold' },
+  qtyLabel: { fontSize: 24, fontWeight: 'bold', marginHorizontal: 32 },
+  errorText: { fontSize: 18, marginBottom: 16 },
 });

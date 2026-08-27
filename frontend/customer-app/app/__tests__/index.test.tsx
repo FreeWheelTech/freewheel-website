@@ -25,10 +25,10 @@ describe('Customer App Root Screen', () => {
 
   it('renders correctly and displays expected text', async () => {
     await render(<RootScreen />, { wrapper: Wrapper });
-    expect(screen.getByText('BYTE++ FOOD')).toBeTruthy();
-    expect(screen.getByText('BYTE++ Cafe')).toBeTruthy();
-    expect(screen.getByText('ROLLS')).toBeTruthy();
-    expect(screen.getByText('Veg Roll')).toBeTruthy();
+    expect(screen.getByText('BYTE++ Café')).toBeTruthy();
+    expect(screen.getByText('Menu')).toBeTruthy();
+    expect(screen.getByText('All')).toBeTruthy();
+    expect(screen.getByText(/Veg Roll/)).toBeTruthy();
     expect(screen.getByText('₹59')).toBeTruthy();
   });
 });
